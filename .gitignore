@@ -5,6 +5,9 @@ media/videos/main/*/partial_movie_files*
 example.json
 *.tex
 *.png
+media/
+text.py
+tmp.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
