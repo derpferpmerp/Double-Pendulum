@@ -1,11 +1,17 @@
-import ffmpeg, os, subprocess, re, json
+import json
+import os
+import re
+import subprocess
+
+import ffmpeg
+
 
 def get_frame_rate(filename):
     if not os.path.exists(filename):
         sys.stderr.write(f"ERROR: filename {filename} was not found!")
         return -1
     out = subprocess.check_output(["ffprobe",filename,"-v","0","-select_streams","v","-print_format","flat","-show_entries","stream=r_frame_rate"]).decode("utf-8")
-    rate = out.split('"')[1].split('/')
+    rate = out.split('"')[1].split("/")
     if len(rate) == 1:
         return float(rate[0])
     if len(rate) == 2:
@@ -23,7 +29,7 @@ def get_duration(filename):
 def changeVideoSpeed(inputFileName, jsonfile="tmp.json", outputFileName="output.mp4", removeOldVideo=True):
         safeRemove("midStep.mp4")
         safeRemove("output.mp4")
-        with open(jsonfile, "r") as infile:
+        with open(jsonfile) as infile:
             data = json.load(infile)
 
         deltat = data["DELAY"]
@@ -40,7 +46,7 @@ def changeVideoSpeed(inputFileName, jsonfile="tmp.json", outputFileName="output.
 
         print(f"{FRAME_RATE=}")
         stream = ffmpeg.input(inputFileName)
-        stream = ffmpeg.setpts(stream, '{0}*PTS'.format(RATIO))
+        stream = ffmpeg.setpts(stream, f"{RATIO}*PTS")
         stream = ffmpeg.output(stream, outputFileName, r=str(60))
         ffmpeg.run(stream)
 
@@ -53,5 +59,5 @@ def changeVideoSpeed(inputFileName, jsonfile="tmp.json", outputFileName="output.
 
         if removeOldVideo:
             os.remove(inputFileName)
-       
+
 changeVideoSpeed(os.path.join(*["media", "videos", "main", "1080p30", "MovingDots.mp4"]), removeOldVideo=False)
